@@ -1,0 +1,65 @@
+Configuro GraphQL en el módulo principal: En app.module.ts, agrego el módulo GraphQL:
+
+typescript
+Copiar código
+import { Module } from '@nestjs/common';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+@Module({
+  imports: [
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: true, // Genera el esquema automáticamente
+    }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: 'password',
+      database: 'items_db',
+      autoLoadEntities: true,
+      synchronize: true, // Solo para desarrollo
+    }),
+  ],
+})
+export class AppModule {}
+
+
+Defino la entidad Item: Creo un archivo item.entity.ts en la carpeta src/item:
+
+typescript
+Copiar código
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+
+@Entity()
+export class Item {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  nombre: string;
+
+  @Column()
+  descripcion: string;
+
+  @CreateDateColumn()
+  fechaCreacion: Date;
+}
+Configuro un CronJob: En task.service.ts:
+
+typescript
+Copiar código
+import { Injectable } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
+
+@Injectable()
+export class TaskService {
+  @Cron('0 0 * * *') // Ejecutar diariamente a medianoche
+  handleCron() {
+    console.log('Ejecutando tarea programada');
+  }
+}
+  
